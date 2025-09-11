@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/shard-cloud/cli/internal/cli"
 	"github.com/shard-cloud/cli/internal/commands"
@@ -59,7 +60,7 @@ func main() {
 	if err != nil {
 		return
 	}
-	if latestVersion != version {
+	if strings.ReplaceAll(latestVersion, "v", "") != strings.ReplaceAll(version, "v", "") {
 		fmt.Printf("\nA new version of the Shard Cloud CLI %s is available. Please update to the latest version.\n", latestVersion)
 	}
 }
