@@ -1,0 +1,50 @@
+version: 2
+project_name: shardcloud
+
+before:
+  hooks:
+    - go mod tidy
+    - make completions
+
+builds:
+  - main: ./cmd/shardcloud
+    goos: [linux, windows, darwin]
+    goarch: ["386", amd64, arm, arm64]
+    goarm: ["7"]
+    ignore:
+      - goos: windows
+        goarch: arm
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+archives:
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Os }}_{{- .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - completions/*
+      - LICENSE
+      - README.md
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-preview"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+release:
+  github:
+    owner: shard-cloud
+    name: cli
