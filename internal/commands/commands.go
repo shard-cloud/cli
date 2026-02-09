@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/manifoldco/promptui"
@@ -41,11 +40,20 @@ func (c *Commands) getAppId(args []string) string {
 		return args[0]
 	}
 
+	cwd, err := os.Getwd()
+	if err == nil {
+		config, _ := config.GetAppConfig(cwd)
+
+		if config != nil && config.AppID != "" {
+			return config.AppID
+		}
+	}
+
 	apps, err := c.cli.GetAppsQuiet(context.Background())
 	if err != nil {
 		return ""
 	}
-	fmt.Println(apps[0].RealTimeRam)
+
 	items := make([]string, len(apps))
 	for i, app := range apps {
 		items[i] = app.App.Name
@@ -66,17 +74,6 @@ func (c *Commands) getAppId(args []string) string {
 			break
 		}
 	}
-	if appID == "" {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return ""
-		}
-		config, err := config.GetAppConfig(cwd)
-		if err != nil {
-			return ""
-		}
-		appID = config.AppID
 
-	}
 	return appID
 }

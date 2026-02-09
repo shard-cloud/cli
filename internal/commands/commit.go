@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/briandowns/spinner"
-	"github.com/shard-cloud/cli/internal/config"
 	"github.com/shard-cloud/cli/pkg/zip"
 	"github.com/spf13/cobra"
 )
@@ -27,9 +26,9 @@ func (c *Commands) runCommitCommand(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	config, err := config.GetAppConfig(currentDir)
-	if err != nil {
-		return err
+	appID := c.getAppId(args)
+	if appID == "" {
+		return fmt.Errorf("app not found")
 	}
 
 	file, _ := cmd.Flags().GetString("file")
@@ -51,13 +50,13 @@ func (c *Commands) runCommitCommand(cmd *cobra.Command, args []string) error {
 	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 	s.Suffix = "Committing app..."
 	s.Start()
-	_, err = c.cli.UpdateApp(context.Background(), config.AppID, zipData)
+	_, err = c.cli.UpdateApp(context.Background(), appID, zipData)
 	if err != nil {
 		return err
 	}
 	s.Stop()
 
-	fmt.Printf("App %s committed", config.DisplayName)
+	fmt.Printf("App %s committed", appID)
 
 	return nil
 }
